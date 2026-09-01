@@ -1,9 +1,13 @@
 ﻿// app/api/tiktok/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthenticationUrl } from "@/lib/tiktok/auth";
+import {
+  getAppUrl,
+  getAuthenticationUrl,
+  getTikTokRedirectUri,
+} from "@/lib/tiktok/auth";
 
 export async function GET(req: NextRequest) {
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/tiktok/callback`;
+  const redirectUri = getTikTokRedirectUri();
 
   const { url, state, codeVerifier } = getAuthenticationUrl(redirectUri);
 
@@ -11,7 +15,9 @@ export async function GET(req: NextRequest) {
 
   const cookieOptions = {
     httpOnly: true,
-    secure: true,
+    // Secure cookies are rejected over plain HTTP by some browsers (e.g.
+    // Safari), so only set the flag when the app itself runs on https.
+    secure: getAppUrl().startsWith("https://"),
     sameSite: "lax" as const,
     maxAge: 60 * 10, // 10 minutes
     path: "/",

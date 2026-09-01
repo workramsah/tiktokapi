@@ -7,14 +7,50 @@ const TIKTOK_TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/";
 const CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY!;
 const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET!;
 
+/**
+ * Scopes that work in Sandbox mode. Production-only scopes such as
+ * user.info.profile / user.info.stats are intentionally left out until the
+ * app is approved - requesting them in sandbox fails the consent flow.
+ * Re-add them here (and in the portal) after production approval.
+ */
 export const TIKTOK_SCOPES = [
   "user.info.basic",
-  "user.info.profile",
-  "user.info.stats",
-  "video.publish",
-  "video.upload",
   "video.list",
 ];
+
+/**
+ * Validates and returns the app's base URL (no trailing slash).
+ *
+ * This MUST be a single URL that exactly matches a redirect URL registered in
+ * the TikTok developer portal (Login Kit settings, in the mode - sandbox or
+ * production - you are testing in). A wrong value causes TikTok's
+ * "We couldn't log in with TikTok - redirect_uri" error screen.
+ */
+export function getAppUrl(): string {
+  const raw = (process.env.NEXT_PUBLIC_APP_URL ?? "").trim();
+
+  if (!raw || /\s/.test(raw) || raw.includes("|")) {
+    throw new Error(
+      "NEXT_PUBLIC_APP_URL is missing or malformed. It must be ONE base URL, e.g. " +
+        "http://localhost:3000 or https://your-app.vercel.app, exactly matching a " +
+        "redirect URL registered in the TikTok developer portal. " +
+        "(Env files do not support the '||' fallback syntax.)"
+    );
+  }
+
+  return raw.replace(/\/+$/, "");
+}
+
+/** The callback path that must be registered as a redirect URL with TikTok. */
+const TIKTOK_REDIRECT_PATH = "/api/tiktok/callback";
+
+/**
+ * Builds the redirect_uri sent to TikTok. The authorize request and the token
+ * exchange must send the exact same value, so both routes use this helper.
+ */
+export function getTikTokRedirectUri(): string {
+  return `${getAppUrl()}${TIKTOK_REDIRECT_PATH}`;
+}
 
 /**
  * Generates a PKCE code verifier (43-128 unreserved chars, RFC 7636).
