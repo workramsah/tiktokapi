@@ -8,14 +8,13 @@ const CLIENT_KEY = process.env.TIKTOK_CLIENT_KEY!;
 const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET!;
 
 /**
- * Scopes that work in Sandbox mode. Production-only scopes such as
- * user.info.profile / user.info.stats are intentionally left out until the
- * app is approved - requesting them in sandbox fails the consent flow.
- * Re-add them here (and in the portal) after production approval.
+ * Scopes that are actually enabled for this app in the TikTok developer
+ * portal. Requesting any other scope (e.g. video.list) makes TikTok's OAuth
+ * authorize page reject the request with a scope error. Only add scopes
+ * here after they have been enabled in the portal.
  */
 export const TIKTOK_SCOPES = [
   "user.info.basic",
-  "video.list",
 ];
 
 /**
