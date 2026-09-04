@@ -1,4 +1,4 @@
-﻿// app/api/tiktok/callback/route.ts
+// app/api/tiktok/callback/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import {
   exchangeCodeForToken,
@@ -33,12 +33,20 @@ export async function GET(req: NextRequest) {
     const redirectUri = getTikTokRedirectUri();
     const tokenData = await exchangeCodeForToken(code, redirectUri, codeVerifier);
 
-    // TODO: persist tokenData (access_token, refresh_token, open_id, etc.)
+    // TODO: persist the full tokenData (refresh_token, open_id, etc.)
     // to your DB / session, associated with the current user.
-
+    // For now we hand the access token to the dashboard via a cookie so it
+    // can be displayed there. It is NOT httpOnly because the client-side
+    // dashboard page reads it to show the token to the user.
     const response = NextResponse.redirect(
       `${getAppUrl()}/dashboard?tiktok=connected`
     );
+    response.cookies.set("tiktok_access_token", tokenData.access_token, {
+      secure: getAppUrl().startsWith("https://"),
+      sameSite: "lax" as const,
+      maxAge: tokenData.expires_in,
+      path: "/",
+    });
     response.cookies.delete("tiktok_oauth_state");
     response.cookies.delete("tiktok_code_verifier");
     return response;
