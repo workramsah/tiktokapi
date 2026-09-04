@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import VideoUploader from "@/components/video-uploader";
 
 const ACCESS_TOKEN_COOKIE = "tiktok_access_token";
 
@@ -42,6 +43,7 @@ export default function Page() {
             <h1>Dashboard</h1>
 
             {accessToken ? (
+                <>
                 <section>
                     <p>✅ Connected with TikTok</p>
                     <div>
@@ -57,6 +59,8 @@ export default function Page() {
                         {showToken ? "Hide" : "Show"}
                     </button>
                 </section>
+                <VideoUploader />
+                </>
             ) : (
                 <section>
                     <p>You are not connected yet.</p>

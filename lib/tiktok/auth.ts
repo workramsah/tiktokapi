@@ -15,6 +15,12 @@ const CLIENT_SECRET = process.env.TIKTOK_CLIENT_SECRET!;
  */
 export const TIKTOK_SCOPES = [
   "user.info.basic",
+  // Required for the dashboard video uploader (Direct Post). This only works
+  // after the "Content Posting API" product (with Direct Post enabled) and the
+  // video.publish scope are approved for the app in the TikTok developer
+  // portal. Until then, TikTok rejects the whole OAuth login with a scope
+  // error - remove this scope again if you only need plain login.
+  "video.publish",
 ];
 
 /**
